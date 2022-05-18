@@ -12,7 +12,7 @@ public class MutantAnalyzerTest {
         List<MutantMetadata> empty = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         MutantAnalyzer.analyze(
-                "/Users/maru/Desktop/mut-testing/test/mutation_report_tests/malformed");
+                "test/mutation_report_tests/malformed");
     }
 
     @Test
@@ -20,7 +20,7 @@ public class MutantAnalyzerTest {
         List<MutantMetadata> res = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         float score = MutantAnalyzer.analyze(
-                "/Users/maru/Desktop/mut-testing/test/mutation_report_tests/mutants_all_killed");
+                "test/mutation_report_tests/mutants_all_killed");
         Assert.assertEquals(100.0, score, 1e-15);
     }
 }
