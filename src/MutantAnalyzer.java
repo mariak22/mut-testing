@@ -5,6 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Logic to generate mutation score. The function expects the
+ * content of the mutation reports to be de-serializable to
+ * MutantMetadata class and errors out if the file is empty.
+ */
 public class MutantAnalyzer {
     public static float analyze(String test_res_file_path) {
         File file = new File(test_res_file_path);
