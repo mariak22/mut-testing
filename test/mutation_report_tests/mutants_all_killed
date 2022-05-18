@@ -1,0 +1,13 @@
+[ {
+  "killed" : true,
+  "mop" : "ARITH",
+  "line_failed" : 2
+}, {
+  "killed" : true,
+  "mop" : "LOGICAL",
+  "line_failed" : 20
+}, {
+  "killed" : true,
+  "mop" : "LOOP",
+  "line_failed" : 200
+} ]

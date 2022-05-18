@@ -15,6 +15,9 @@
     <path id="classpath.test">
         <path refid="classpath.base"/>
         <pathelement location="${lib.dir}/junit-4.5.jar"/>
+        <pathelement location="${lib.dir}/jackson-annotations-2.13.3.jar"/>
+        <pathelement location="${lib.dir}/jackson-core-2.13.3.jar"/>
+        <pathelement location="${lib.dir}/jackson-databind-2.13.3.jar"/>
     </path>
 
     <!-- Target for deleting the existing directories-->
@@ -44,6 +47,9 @@
             <classpath>
                 <pathelement location="bin" />
                 <pathelement location="lib/junit-4.5.jar"/>
+                <pathelement location="lib/jackson-annotations-2.13.3.jar"/>
+                <pathelement location="lib/jackson-core-2.13.3.jar"/>
+                <pathelement location="lib/jackson-databind-2.13.3.jar"/>
             </classpath>
             <batchtest>
                 <fileset dir="${test.dir}">
