@@ -1,12 +1,12 @@
-public class MutationTester {
+public class MutationTesterMutated {
     public static int test_arith(int b, int c) {
-        int result = b + c;
+        int result = b - c;
 
         return result;
     }
 
     public static int test_multi_arith(int b, int c, int d) {
-        int result = b + c - d;
+        int result = b - c + d;
 
         return result;
     }

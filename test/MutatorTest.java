@@ -1,28 +1,35 @@
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Optional;
 
 public class MutatorTest {
     @Test
     public void mutateArithTest() {
-        Set s = new HashSet<MutantOperation>();
-        s.add(MutantOperation.ARITH);
-        Mutator m = new Mutator(s, "test_arith",
-                "src/MutationTester.java", "src/MutationArithTesterMutated.java");
-        m.mutate();
+        Mutator m = new Mutator(MutantOperation.ARITH, "test_arith",
+                "src/MutationTester.java", "test/MutationTesterTest.java",
+                Optional.of("testArithTest_mutantKilled"));
+        float score = m.mutate();
+        Assert.assertEquals(100.0, score, 0.001);
+//        new File(mutatedFile).delete();
+    }
 
-        new File("src/MutationArithTesterMutated.java").delete();
+    @Test
+    public void mutateMultiArithTest() {
+        Mutator m = new Mutator(MutantOperation.ARITH, "test_multi_arith",
+                "src/MutationTester.java", "test/MutationTesterTest.java",
+                Optional.of("testMultiArithTest_mutantKilled"));
+        float score = m.mutate();
+        Assert.assertEquals(100, score, 0.001);
+//        new File(mutatedFile).delete();
     }
 
     @Test
     public void mutateLogicalTest() {
-        Set s = new HashSet<MutantOperation>();
-        s.add(MutantOperation.LOGICAL);
-        Mutator m = new Mutator(s, "test_logical",
-                "src/MutationTester.java", "src/MutationLogicalTesterMutated.java");
-        m.mutate();
-        new File("src/MutationLogicalTesterMutated.java").delete();
+        Mutator m = new Mutator(MutantOperation.LOGICAL, "test_logical",
+                "src/MutationTester.java", "test/MutationTesterTest.java",
+                Optional.empty());
+        float mutatedFile = m.mutate();
+//        new File(mutatedFile).delete();
     }
 }

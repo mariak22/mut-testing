@@ -16,7 +16,7 @@ public class MutantAnalyzer {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             List<MutantMetadata> mutantMetadata =
-                    objectMapper.readValue(file, new TypeReference<List<MutantMetadata>>(){});
+                    objectMapper.readValue(file, new TypeReference<>(){});
             int killedMutants = 0;
             for (MutantMetadata meta : mutantMetadata) {
                 if (meta.isKilled()) {

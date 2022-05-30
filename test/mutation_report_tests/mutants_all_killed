@@ -1,9 +1,7 @@
 [ {
   "killed" : true,
-  "mop" : "ARITH",
-  "line_failed" : 2
+  "mop" : "ARITH"
 }, {
   "killed" : true,
-  "mop" : "LOGICAL",
-  "line_failed" : 20
+  "mop" : "LOGICAL"
 } ]

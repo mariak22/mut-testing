@@ -1,5 +1,11 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.runner.Result;
+
 import java.io.*;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -11,24 +17,26 @@ import java.util.Set;
  * in the location where the mutated code exists.
  */
 public class Mutator {
-    private final Set<MutantOperation> mops;
+    private final MutantOperation mop;
     private final String functionName;
     private final String src;
-    private final String dest;
+    private final String tst;
+    private final Optional<String> tstCase;
 
-    public Mutator(Set<MutantOperation> mops, String functionName, String src, String dest) {
-        this.mops = mops;
+    public Mutator(MutantOperation mop, String functionName, String src, String tst, Optional<String> tstCase) {
+        this.mop = mop;
         this.functionName = functionName;
         if (new File(src).exists()) {
             this.src = src;
         } else {
             throw new IllegalArgumentException(src + " is not a valid file path");
         }
-        this.dest = dest;
+        this.tst = tst;
+        this.tstCase = tstCase;
     }
 
-    public Set<MutantOperation> getMops() {
-        return mops;
+    public MutantOperation getMop() {
+        return mop;
     }
 
     public String getFunctionName() {
@@ -39,19 +47,23 @@ public class Mutator {
         return src;
     }
 
-    public String getDest() {
-        return dest;
+    public String getTst() {
+        return tst;
     }
 
     // Function that mutates the source code and returns the
-    // path of the mutation test report file to the caller.
-    public String mutate() {
-        try {
-            String className = Paths.get(this.src).getFileName().toString();
-            className = className.substring(0, className.lastIndexOf(".java"));
-            String mutatedClassName = Paths.get(this.dest).getFileName().toString();
-            mutatedClassName = mutatedClassName.substring(0, mutatedClassName.lastIndexOf(".java"));
+    // file path of the mutated source code to the caller.
+    public Float mutate() {
+        Path srcPath = Paths.get(this.src);
+        String parentPath = srcPath.getParent().toString();
+        String className = srcPath.getFileName().toString();
+        className = className.substring(0, className.lastIndexOf(".java"));
 
+        String dest = String.format("%s/%sMutated.java", parentPath, className);
+        String mutatedClassName = Paths.get(dest).getFileName().toString();
+        mutatedClassName = mutatedClassName.substring(0, mutatedClassName.lastIndexOf(".java"));
+
+        try {
             // Read source file to mutate
             BufferedReader br = new BufferedReader(new FileReader(src));
             String line = br.readLine();
@@ -64,29 +76,35 @@ public class Mutator {
                 if (line.contains(className)) {
                     mutatedLine = line.replace(className, mutatedClassName);
                 } else {
-                    for (MutantOperation mop : this.mops) {
-                        switch (mop) {
-                            case ARITH:
-                                if (line.contains(" + ")) {
-                                    mutatedLine = line.replace(" + ", " - ");
-                                } else if (line.contains(" - ")) {
-                                    mutatedLine = line.replace(" - ", " + ");
-                                } else if (line.contains(" * ")) {
-                                    mutatedLine = line.replace(" * ", " / ");
-                                } else if (line.contains(" / ")) {
-                                    mutatedLine = line.replace(" / ", " * ");
+                    switch (this.mop) {
+                        case ARITH:
+                            StringBuilder sb = new StringBuilder(line);
+                            for (int i = 0; i < line.length(); ++i) {
+                                if (line.charAt(i) == '+') {
+                                    sb.setCharAt(i, '-');
+                                } else if (line.charAt(i) == '-') {
+                                    sb.setCharAt(i, '+');
+                                } else if (line.charAt(i) == '*') {
+                                    sb.setCharAt(i, '/');
+                                } else if (line.charAt(i) == '/') {
+                                    sb.setCharAt(i, '*');
                                 }
-                                break;
-                            case LOGICAL:
-                                if (line.contains(" & ")) {
-                                    mutatedLine = line.replace(" & ", " | ");
-                                } else if (line.contains(" | ")) {
-                                    mutatedLine = line.replace(" | ", " & ");
+                            }
+                            mutatedLine = sb.toString();
+                            break;
+                        case LOGICAL:
+                            sb = new StringBuilder(line);
+                            for (int i = 0; i < line.length(); ++i) {
+                                if (line.charAt(i) == '&') {
+                                    sb.setCharAt(i, '|');
+                                } else if (line.charAt(i) == '|') {
+                                    sb.setCharAt(i, '&');
                                 }
-                                break;
-                            default:
-                                throw new IllegalArgumentException("Invalid mutatation operation " + mop);
-                        }
+                            }
+                            mutatedLine = sb.toString();
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Invalid mutation operation " + mop);
                     }
                 }
 
@@ -96,20 +114,30 @@ public class Mutator {
             }
             bw.flush();
             bw.close();
+
+            Result result = MutationRunner.runTestOnMutatedFile(this.tstCase, this.src, dest, this.tst);
+            boolean is_mutant_killed = result.getFailureCount() > 0 ? true : false;
+            MutantMetadata mm = new MutantMetadata(is_mutant_killed, this.mop);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String resultFile = "src/ResultFile.json";
+            objectMapper.writeValue(new File(resultFile), Collections.singletonList(mm));
+
+            float score = MutantAnalyzer.analyze(resultFile);
+            return score;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return dest;
+        return null;
     }
 
     @Override
     public String toString() {
         return "Mutator{" +
-                "mops=" + mops +
+                "mop=" + mop +
                 ", functionName='" + functionName + '\'' +
                 ", src='" + src + '\'' +
-                ", dest='" + dest + '\'' +
+                ", tst='" + tst + '\'' +
                 '}';
     }
 }
