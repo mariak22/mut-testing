@@ -6,8 +6,4 @@
   "killed" : true,
   "mop" : "LOGICAL",
   "line_failed" : 20
-}, {
-  "killed" : true,
-  "mop" : "LOOP",
-  "line_failed" : 200
 } ]
