@@ -1,3 +1,7 @@
+import java.io.*;
+import java.nio.file.Paths;
+import java.util.Set;
+
 /**
  * The mutator component takes mutation operator, path to source code
  * to modify as input and the path to the corresponding test file.
@@ -7,18 +11,28 @@
  * in the location where the mutated code exists.
  */
 public class Mutator {
-    private final MutantOperation mop;
+    private final Set<MutantOperation> mops;
+    private final String functionName;
     private final String src;
     private final String dest;
 
-    public Mutator(MutantOperation mop, String src, String dest) {
-        this.mop = mop;
-        this.src = src;
+    public Mutator(Set<MutantOperation> mops, String functionName, String src, String dest) {
+        this.mops = mops;
+        this.functionName = functionName;
+        if (new File(src).exists()) {
+            this.src = src;
+        } else {
+            throw new IllegalArgumentException(src + " is not a valid file path");
+        }
         this.dest = dest;
     }
 
-    public MutantOperation getMop() {
-        return mop;
+    public Set<MutantOperation> getMops() {
+        return mops;
+    }
+
+    public String getFunctionName() {
+        return functionName;
     }
 
     public String getSrc() {
@@ -32,13 +46,68 @@ public class Mutator {
     // Function that mutates the source code and returns the
     // path of the mutation test report file to the caller.
     public String mutate() {
-        throw new IllegalStateException("Unimplemented function");
+        try {
+            String className = Paths.get(this.src).getFileName().toString();
+            className = className.substring(0, className.lastIndexOf(".java"));
+            String mutatedClassName = Paths.get(this.dest).getFileName().toString();
+            mutatedClassName = mutatedClassName.substring(0, mutatedClassName.lastIndexOf(".java"));
+
+            // Read source file to mutate
+            BufferedReader br = new BufferedReader(new FileReader(src));
+            String line = br.readLine();
+
+            // Append lines to dest file and mutate
+            BufferedWriter bw = new BufferedWriter(new FileWriter(dest));
+
+            while (line != null) {
+                String mutatedLine = line;
+                if (line.contains(className)) {
+                    mutatedLine = line.replace(className, mutatedClassName);
+                } else {
+                    for (MutantOperation mop : this.mops) {
+                        switch (mop) {
+                            case ARITH:
+                                if (line.contains(" + ")) {
+                                    mutatedLine = line.replace(" + ", " - ");
+                                } else if (line.contains(" - ")) {
+                                    mutatedLine = line.replace(" - ", " + ");
+                                } else if (line.contains(" * ")) {
+                                    mutatedLine = line.replace(" * ", " / ");
+                                } else if (line.contains(" / ")) {
+                                    mutatedLine = line.replace(" / ", " * ");
+                                }
+                                break;
+                            case LOGICAL:
+                                if (line.contains(" & ")) {
+                                    mutatedLine = line.replace(" & ", " | ");
+                                } else if (line.contains(" | ")) {
+                                    mutatedLine = line.replace(" | ", " & ");
+                                }
+                                break;
+                            default:
+                                throw new IllegalArgumentException("Invalid mutatation operation " + mop);
+                        }
+                    }
+                }
+
+                bw.write(mutatedLine);
+                bw.newLine();
+                line = br.readLine();
+            }
+            bw.flush();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return dest;
     }
 
     @Override
     public String toString() {
         return "Mutator{" +
-                "mop=" + mop +
+                "mops=" + mops +
+                ", functionName='" + functionName + '\'' +
                 ", src='" + src + '\'' +
                 ", dest='" + dest + '\'' +
                 '}';
