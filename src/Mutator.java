@@ -110,13 +110,17 @@ public class Mutator {
             bw.flush();
             bw.close();
 
+            // Integrate with MutationRunner to run user provided Junit test(s)
             Result result = MutationRunner.runTestOnMutatedFile(this.tstCase, this.src, dest, this.tst);
             boolean is_mutant_killed = result.getFailureCount() > 0 ? true : false;
             MutantMetadata mm = new MutantMetadata(is_mutant_killed, this.mop);
             ObjectMapper objectMapper = new ObjectMapper();
+
+            // Write mutation result which serves as input for MutationAnalyzer
             String resultFile = "src/ResultFile.json";
             objectMapper.writeValue(new File(resultFile), Collections.singletonList(mm));
 
+            // Score the mutation testing run
             float score = MutantAnalyzer.analyze(resultFile);
             return score;
         } catch (IOException e) {

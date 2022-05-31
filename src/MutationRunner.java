@@ -8,6 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+/**
+ * Responsible for auto-generate user test file that integrates with the mutated source code
+ * and executes junit tests in runtime. Returns the Result object generated from JUnitCore.
+ */
 public class MutationRunner {
     public static Result runTestOnMutatedFile(Optional<String> functionName, String srcFile,
                                               String mutatedFile, String tstFile) {
