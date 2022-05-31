@@ -18,14 +18,12 @@ import java.util.Set;
  */
 public class Mutator {
     private final MutantOperation mop;
-    private final String functionName;
     private final String src;
     private final String tst;
     private final Optional<String> tstCase;
 
-    public Mutator(MutantOperation mop, String functionName, String src, String tst, Optional<String> tstCase) {
+    public Mutator(MutantOperation mop, String src, String tst, Optional<String> tstCase) {
         this.mop = mop;
-        this.functionName = functionName;
         if (new File(src).exists()) {
             this.src = src;
         } else {
@@ -39,9 +37,6 @@ public class Mutator {
         return mop;
     }
 
-    public String getFunctionName() {
-        return functionName;
-    }
 
     public String getSrc() {
         return src;
@@ -135,7 +130,6 @@ public class Mutator {
     public String toString() {
         return "Mutator{" +
                 "mop=" + mop +
-                ", functionName='" + functionName + '\'' +
                 ", src='" + src + '\'' +
                 ", tst='" + tst + '\'' +
                 '}';

@@ -6,7 +6,7 @@ import java.util.Optional;
 public class MutationRunnerTest {
     @Test
     public void testMutationRunner() {
-        Mutator m = new Mutator(MutantOperation.ARITH, "test_arith",
+        Mutator m = new Mutator(MutantOperation.ARITH,
                 "src/MutationTester.java", "test/MutationTesterTest.java",
                 Optional.of("testArithTest_mutantKilled"));
         Float score = m.mutate();
